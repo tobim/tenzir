@@ -1,0 +1,96 @@
+phony := gen
+.DEFAULT: all
+.PHONY: $(phony) config
+
+EXTERNAL := $(filter-out $(phony), $(MAKECMDGOALS))
+
+ns := nix-shell --pure
+
+source := vast
+builddir := $(HOME)/build/vast
+
+ifeq (${attr},)
+	attr := clang6
+endif
+
+ifeq (${variant},)
+	variant := debug
+endif
+
+ifeq "$(origin san)" "undefined"
+	san := asan
+endif
+
+ifneq (${dtag},)
+	dtag_ := -${dtag}
+endif
+
+ifneq (${lld},)
+	dtag_ += -lld
+	ns += --arg use_lld true
+endif
+
+CMAKEARGS := -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+CMAKEARGS += -DNO_AUTO_LIBCPP=1
+CMAKEARGS += -DVAST_ENABLE_ASSERTIONS=1
+#CMAKEARGS += -DMORE_WARNINGS=1
+
+ifneq ($(filter asan,$(san)),)
+	CMAKEARGS += -DENABLE_ADDRESS_SANITIZER=1
+endif
+
+ifneq ($(filter tsan,$(san)),)
+	CMAKEARGS += -DENABLE_THREAD_SANITIZER=1
+endif
+
+ifneq ($(filter ubsan,$(san)),)
+	CMAKEARGS += -DENABLE_UNDEFINED_SANITIZER=1
+endif
+
+
+all: gen
+
+comma:= ,
+empty:=
+space:= $(empty) $(empty)
+attr_:= $(subst $(comma),$(space),$(attr))
+variant_:= $(subst $(comma),$(space),$(variant))
+ifneq ($(san),)
+	san_:= -$(subst $(comma),+,$(san))
+endif
+
+CCACHE_CPP2 := true
+export CCACHE_CPP2
+
+define BOZO
+
+ifeq ($(2),debug)
+	VC-$(1)$(2) := Debug
+endif
+ifeq ($(2),release)
+	VC-$(1)$(2) := RelWithDebInfo
+endif
+
+SUBBUILD-$(1)$(2) := $(1)-$(2)$(san_)$(dtag_)
+BUILD-$(1)$(2) := $(builddir)/$(1)-$(2)$(san_)$(dtag_)
+
+CAF-$(1)$(2) := $(abspath $(builddir)/../caf/$$(SUBBUILD-$(1)$(2)))
+
+$$(BUILD-$(1)$(2)):
+	$(ns) --argstr compiler $(1) --run "cmake -B$$(BUILD-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DCAF_ROOT_DIR=$$(CAF-$(1)$(2)) $(CMAKEARGS)"
+
+gen: $$(BUILD-$(1)$(2))
+
+.PHONY:=run-$(1)$(2)
+run-$(1)$(2): $$(BUILD-$(1)$(2))
+	eval `$(ns) --argstr compiler $(1) --run "export" | sed 's/$$$$/\;/'`; \
+	$$(MAKE) -C $$(BUILD-$(1)$(2)) $$(EXTERNAL) --no-print-directory
+
+$(or $(lastword $(EXTERNAL)), all): run-$(1)$(2)
+
+endef
+
+$(foreach i,${attr_},$(foreach j,${variant_},$(eval $(call BOZO,$(i),$(j)))))
+
+shell:
+	nix-shell --argstr compiler ${attr}

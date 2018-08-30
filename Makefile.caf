@@ -1,0 +1,101 @@
+phony := gen
+.DEFAULT: config
+.PHONY: $(phony) all
+
+EXTERNAL := $(filter-out $(phony), $(MAKECMDGOALS))
+
+ns := nix-shell --pure
+
+source := caf
+builddir := $(HOME)/build/caf
+
+ifeq (${attr},)
+	attr := clang6
+endif
+
+ifeq (${variant},)
+	variant := debug
+endif
+
+ifeq "$(origin san)" "undefined"
+	san := asan
+endif
+
+ifneq (${lld},)
+	dtag += -lld
+	ns += --arg use_lld true
+endif
+
+ifneq (${dtag},)
+	dtag_ := -${dtag}
+endif
+
+all: gen
+
+comma:= ,
+empty:=
+space:= $(empty) $(empty)
+attr_:= $(subst $(comma),$(space),$(attr))
+variant_:= $(subst $(comma),$(space),$(variant))
+ifneq ($(san),)
+	san_:= -$(subst $(comma),+,$(san))
+endif
+
+CMAKEARGS := -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+
+CMAKEARGS += -DCAF_NO_BENCHMARKS=1
+CMAKEARGS += -DCAF_NO_EXAMPLES=1
+CMAKEARGS += -DCAF_NO_OPENCL=1
+CMAKEARGS += -DCAF_NO_OPENSSL=1
+CMAKEARGS += -DCAF_NO_PYTHON=1
+CMAKEARGS += -DCAF_NO_AUTO_LIBCPP=1
+CMAKEARGS += -DCAF_LOG_LEVEL=4
+#CMAKEARGS += -DMORE_WARNINGS=1
+
+ifneq ($(filter asan,$(san)),)
+	CMAKEARGS += -DCAF_ENABLE_ADDRESS_SANITIZER=1
+endif
+
+ifneq ($(filter tsan,$(san)),)
+	CMAKEARGS += -DCAF_ENABLE_THREAD_SANITIZER=1
+endif
+
+ifneq ($(filter ubsan,$(san)),)
+	CMAKEARGS += -DCAF_ENABLE_UNDEFINED_SANITIZER=1
+endif
+
+CCACHE_CPP2 := true
+export CCACHE_CPP2
+
+define BOZO
+
+ifeq ($(2),debug)
+	VC-$(1)$(2) := Debug
+endif
+ifeq ($(2),release)
+	VC-$(1)$(2) := RelWithDebInfo
+endif
+
+SUBBUILD-$(1)$(2) := $(1)-$(2)$(san_)$(dtag_)
+BUILD-$(1)$(2) := $(builddir)/$(1)-$(2)$(san_)$(dtag_)
+
+CAF-$(1)$(2) := $(abspath $(builddir)/../caf/$$(SUBBUILD-$(1)$(2)))
+
+$$(BUILD-$(1)$(2)):
+	$(ns) --argstr compiler $(1) --run "cmake -B$$(BUILD-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DLIBRARY_OUTPUT_PATH=$$(BUILD-$(1)$(2))/lib -DEXECUTABLE_OUTPUT_PATH=$$(BUILD-$(1)$(2))/bin $(CMAKEARGS)"
+
+gen: $$(BUILD-$(1)$(2))
+
+.PHONY:=run-$(1)$(2)
+run-$(1)$(2): $$(BUILD-$(1)$(2))
+	eval `$(ns) --argstr compiler $(1) --run "export" | sed 's/$$$$/\;/'`; \
+	$$(MAKE) -C $$(BUILD-$(1)$(2)) $$(EXTERNAL) --no-print-directory
+
+$(or $(lastword $(EXTERNAL)), all): run-$(1)$(2)
+
+endef
+
+$(foreach i,${attr_},$(foreach j,${variant_},$(eval $(call BOZO,$(i),$(j)))))
+
+shell:
+	nix-shell --argstr compiler ${attr}
