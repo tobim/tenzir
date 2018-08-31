@@ -72,8 +72,8 @@ ifeq ($(2),release)
 endif
 
 SUBBUILD-$(1)$(2) := $(1)-$(2)$(san_)$(dtag_)
-BUILDDIR-$(1)$(2) := $(builddir)/$(SUBBUILD-$(1)$(2))
-BUILD-$(1)$(2) := $(BUILDDIR-$(1)$(2))/Makefile
+BUILDDIR-$(1)$(2) := $(builddir)/$$(SUBBUILD-$(1)$(2))
+BUILD-$(1)$(2) := $$(BUILDDIR-$(1)$(2))/Makefile
 
 CAF-$(1)$(2) := $(abspath $(builddir)/../caf/$$(SUBBUILD-$(1)$(2)))
 
@@ -85,6 +85,7 @@ gen: $$(BUILD-$(1)$(2))
 .PHONY:=run-$(1)$(2)
 run-$(1)$(2): $$(BUILD-$(1)$(2))
 	eval `$(ns) --argstr compiler $(1) --run "export" | sed 's/$$$$/\;/'`; \
+	NIX_CXXSTDLIB_LINK=''; \
 	$$(MAKE) -C $$(BUILDDIR-$(1)$(2)) $$(EXTERNAL) --no-print-directory
 
 $(or $(lastword $(EXTERNAL)), all): run-$(1)$(2)
