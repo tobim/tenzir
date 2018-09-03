@@ -31,7 +31,7 @@ let
 in with cppPkgs; {
   vast = stdenv.mkDerivation {
     name = "vast";
-    nativeBuildInputs = [ pkgs.bazel pkgs.cmake pkgs.ninja pkgs.doxygen pkgs.graphviz-nox pkgs.ccache pkgs.clang_6 pkgs.glibc ];
+    nativeBuildInputs = [ pkgs.bazel pkgs.cmake pkgs.ninja pkgs.doxygen pkgs.graphviz-nox pkgs.ccache ];
     buildInputs = [ pkgs.libpcap pkgs.curl.dev python ];
     hardeningDisable = [ "all" ];
     LANG = "en_US.UTF-8";
