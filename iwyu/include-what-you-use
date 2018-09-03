@@ -1,0 +1,10 @@
+#! /nix/store/56nrxy58wbhvs2sy3rir1jqa68p0kkm5-bash-4.4-p23/bin/bash -e
+
+exec -a "$0" "/nix/store/983dcm9qvpvn9zhqhg5yi2i99fv4f17f-include-what-you-use-0.10/bin/include-what-you-use" \
+    -B/nix/store/p8qc7gy397rs3kvwa7hryidfvz8wkf5a-clang-6.0.0-lib/lib \
+    -resource-dir=/nix/store/vh6yaz1rygs4rcyrc0gxbmrm9plh89ya-clang-wrapper-6.0.0/resource-root \
+    -B/nix/store/83lrbvbmxrgv7iz49mgd42yvhi473xp6-glibc-2.27/lib/ \
+    -idirafter /nix/store/lyd89mv72m8a0aw1a4idfimyi0rb2b13-glibc-2.27-dev/include \
+    -isystem "/nix/store/849q60036gfgrakhgj070xxypsgyvk9b-libc++-6.0.1/include/c++/v1" \
+    ${NIX_CFLAGS_COMPILE} ${NIX_CXXSTDLIB_COMPILE} "$@"
+

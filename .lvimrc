@@ -1,0 +1,16 @@
+call altr#remove_all()
+
+call altr#define('%/caf/%/caf/%.hpp',
+\                '%/caf/%/src/%.cpp',
+\                '%/caf/%/test/%.cpp')
+
+call altr#define('%/vast/%/vast/%.hpp',
+\                '%/vast/%/src/%.cpp',
+\                '%/vast/%/test/%.cpp')
+
+call altr#define('%/core/%/core/%.hpp',
+\                '%/core/%/src/%.cpp',
+\                '%/core/%/test/%.cpp')
+
+call altr#define('%/test/fixtures/%.hpp',
+\                '%/test/fixtures/%.cpp')

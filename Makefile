@@ -5,10 +5,10 @@ EXTERNAL := $(filter-out $(INTERNAL), $(MAKECMDGOALS))
 caf:
 	$(MAKE) -f Makefile.caf $(EXTERNAL)
 
-vast: caf
+vast:
 	$(MAKE) -f Makefile.vast $(EXTERNAL)
 
-core: vast
+core:
 	$(MAKE) -f Makefile.core $(EXTERNAL)
 
 .PHONY: $(INTERNAL) $(EXTERNAL)
