@@ -49,7 +49,6 @@ CMAKEARGS += -DCAF_NO_OPENCL=1
 CMAKEARGS += -DCAF_NO_OPENSSL=1
 CMAKEARGS += -DCAF_NO_PYTHON=1
 CMAKEARGS += -DCAF_NO_AUTO_LIBCPP=1
-CMAKEARGS += -DCAF_LOG_LEVEL=4
 #CMAKEARGS += -DMORE_WARNINGS=1
 
 ifneq ($(filter asan,$(san)),)
@@ -74,6 +73,12 @@ ifeq ($(2),debug)
 endif
 ifeq ($(2),release)
 	VC-$(1)$(2) := RelWithDebInfo
+endif
+ifeq ($(2),rere)
+	VC-$(1)$(2) := Release
+	CMAKEARGS += -DCAF_LOG_LEVEL=2
+else
+	CMAKEARGS += -DCAF_LOG_LEVEL=4
 endif
 
 SUBBUILD-$(1)$(2) := $(1)-$(2)$(san_)$(dtag_)
