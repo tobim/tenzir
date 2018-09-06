@@ -17,10 +17,6 @@ ifeq (${variant},)
 	variant := debug
 endif
 
-ifeq "$(origin san)" "undefined"
-	san := asan
-endif
-
 ifneq (${dtag},)
 	dtag_ := -${dtag}
 endif
@@ -28,23 +24,6 @@ endif
 ifneq (${lld},)
 	dtag_ += -lld
 	ns += --arg use_lld true
-endif
-
-CMAKEARGS := -DCMAKE_EXPORT_COMPILE_COMMANDS=1
-CMAKEARGS += -DNO_AUTO_LIBCPP=1
-CMAKEARGS += -DVAST_ENABLE_ASSERTIONS=1
-#CMAKEARGS += -DMORE_WARNINGS=1
-
-ifneq ($(filter asan,$(san)),)
-	CMAKEARGS += -DENABLE_ADDRESS_SANITIZER=1
-endif
-
-ifneq ($(filter tsan,$(san)),)
-	CMAKEARGS += -DENABLE_THREAD_SANITIZER=1
-endif
-
-ifneq ($(filter ubsan,$(san)),)
-	CMAKEARGS += -DENABLE_UNDEFINED_SANITIZER=1
 endif
 
 
@@ -55,14 +34,17 @@ empty:=
 space:= $(empty) $(empty)
 attr_:= $(subst $(comma),$(space),$(attr))
 variant_:= $(subst $(comma),$(space),$(variant))
-ifneq ($(san),)
-	san_:= -$(subst $(comma),+,$(san))
-endif
+
+CMAKEARGS := -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=1
+CMAKEARGS += -DNO_AUTO_LIBCPP:BOOL=1
+#CMAKEARGS += -DMORE_WARNINGS=1
 
 CCACHE_CPP2 := true
 export CCACHE_CPP2
 
 define BOZO
+
+CMAKEARGS-$(1)$(2) := $(CMAKEARGS)
 
 ifeq ($(2),debug)
 	VC-$(1)$(2) := Debug
@@ -72,17 +54,37 @@ ifeq ($(2),release)
 endif
 ifeq ($(2),rere)
 	VC-$(1)$(2) := Release
+	CMAKEARGS-$(1)$(2) += -DVAST_LOG_LEVEL:STRING=2
+else
+	CMAKEARGS-$(1)$(2) += -DVAST_LOG_LEVEL:STRING=4
+	CMAKEARGS-$(1)$(2) += -DVAST_ENABLE_ASSERTIONS:BOOL=1
+	$(if $(filter "$(origin san)","undefined"),SAN-$(1)$(2) := asan)
 endif
 
+ifneq ($$(filter asan,$$(SAN-$(1)$(2))),)
+	CMAKEARGS-$(1)$(2) += -DCAF_ENABLE_ADDRESS_SANITIZER=1
+endif
 
-SUBBUILD-$(1)$(2) := $(1)-$(2)$(san_)$(dtag_)
+ifneq ($$(filter tsan,$$(SAN-$(1)$(2))),)
+	CMAKEARGS-$(1)$(2) += -DCAF_ENABLE_THREAD_SANITIZER=1
+endif
+
+ifneq ($$(filter ubsan,$$(SAN-$(1)$(2))),)
+	CMAKEARGS-$(1)$(2) += -DCAF_ENABLE_UNDEFINED_SANITIZER=1
+endif
+
+ifneq ($$(SAN-$(1)$(2)),)
+	SAN_-$(1)$(2) = -$$(subst $$(comma),+,$$(SAN-$(1)$(2)))
+endif
+
+SUBBUILD-$(1)$(2) := $(1)-$(2)$$(SAN_-$(1)$(2))$(dtag_)
 BUILDDIR-$(1)$(2) := $(builddir)/$$(SUBBUILD-$(1)$(2))
 BUILD-$(1)$(2) := $$(BUILDDIR-$(1)$(2))/Makefile
 
 CAF-$(1)$(2) := $(abspath $(builddir)/../caf/$$(SUBBUILD-$(1)$(2)))
 
 $$(BUILD-$(1)$(2)):
-	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' PATH=$$$${PATH}:/Users/tobim/.gem/ruby/2.4.0/bin cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DCAF_ROOT_DIR=$$(CAF-$(1)$(2)) $(CMAKEARGS)"
+	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' PATH=$$$${PATH}:/Users/tobim/.gem/ruby/2.4.0/bin cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DCAF_ROOT_DIR=$$(CAF-$(1)$(2)) $$(CMAKEARGS-$(1)$(2))"
 
 gen: $$(BUILD-$(1)$(2))
 
@@ -97,6 +99,7 @@ $(or $(lastword $(EXTERNAL)), all): run-$(1)$(2)
 
 endef
 
+#$(foreach i,${attr_},$(foreach j,${variant_},$(info $(call BOZO,$(i),$(j)))))
 $(foreach i,${attr_},$(foreach j,${variant_},$(eval $(call BOZO,$(i),$(j)))))
 
 shell:
