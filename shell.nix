@@ -19,7 +19,7 @@ let
     rev = "ebfadee0e024e6bd43bb89b12535d5963324219b";
   });
 
-  pkgs = import nixpkgs {
+  pkgs = import <nixpkgs> {
     config = {};
     overlays = [ cpp_overlay ];
   };

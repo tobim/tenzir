@@ -8,6 +8,8 @@ ns := nix-shell --pure
 
 source := vast
 builddir := $(HOME)/build/vast
+installdir := $(HOME)/install/vast
+caf_installdir := $(HOME)/install/caf
 
 ifeq (${attr},)
 	attr := clang6
@@ -62,15 +64,15 @@ else
 endif
 
 ifneq ($$(filter asan,$$(SAN-$(1)$(2))),)
-	CMAKEARGS-$(1)$(2) += -DCAF_ENABLE_ADDRESS_SANITIZER=1
+	CMAKEARGS-$(1)$(2) += -DENABLE_ADDRESS_SANITIZER=1
 endif
 
 ifneq ($$(filter tsan,$$(SAN-$(1)$(2))),)
-	CMAKEARGS-$(1)$(2) += -DCAF_ENABLE_THREAD_SANITIZER=1
+	CMAKEARGS-$(1)$(2) += -DENABLE_THREAD_SANITIZER=1
 endif
 
 ifneq ($$(filter ubsan,$$(SAN-$(1)$(2))),)
-	CMAKEARGS-$(1)$(2) += -DCAF_ENABLE_UNDEFINED_SANITIZER=1
+	CMAKEARGS-$(1)$(2) += -DENABLE_UNDEFINED_SANITIZER=1
 endif
 
 ifneq ($$(SAN-$(1)$(2)),)
@@ -80,11 +82,12 @@ endif
 SUBBUILD-$(1)$(2) := $(1)-$(2)$$(SAN_-$(1)$(2))$(dtag_)
 BUILDDIR-$(1)$(2) := $(builddir)/$$(SUBBUILD-$(1)$(2))
 BUILD-$(1)$(2) := $$(BUILDDIR-$(1)$(2))/Makefile
+INSTALLDIR-$(1)$(2) := $(installdir)/$$(SUBBUILD-$(1)$(2))
 
-CAF-$(1)$(2) := $(abspath $(builddir)/../caf/$$(SUBBUILD-$(1)$(2)))
+CAF-$(1)$(2) := $(abspath $(caf_installdir)/$$(SUBBUILD-$(1)$(2)))
 
 $$(BUILD-$(1)$(2)):
-	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' PATH=$$$${PATH}:/Users/tobim/.gem/ruby/2.4.0/bin cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DCAF_ROOT_DIR=$$(CAF-$(1)$(2)) $$(CMAKEARGS-$(1)$(2))"
+	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' PATH=$$$${PATH}:/Users/tobim/.gem/ruby/2.4.0/bin cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DCAF_ROOT_DIR=$$(CAF-$(1)$(2)) -DCMAKE_INSTALL_PREFIX=$$(INSTALLDIR-$(1)$(2)) $$(CMAKEARGS-$(1)$(2))"
 
 gen: $$(BUILD-$(1)$(2))
 
