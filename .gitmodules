@@ -1,0 +1,4 @@
+[submodule "caf"]
+	path = caf
+	url = https://github.com/actor-framework/actor-framework
+	branch = master

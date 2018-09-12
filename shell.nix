@@ -10,7 +10,7 @@
 let
   nixpkgs = builtins.fetchGit {
     url = https://github.com/NixOS/nixpkgs;
-    rev = "7138bc0eabe23800273e1fb74e4b39c4e12da08b";
+    rev = "4477cf04b6779a537cdb5f0bd3dd30e75aeb4a3b";
   };
 
   #cpp_overlay = import (../../nixpkgs-cpp);
@@ -31,7 +31,15 @@ let
 in with cppPkgs; {
   vast = stdenv.mkDerivation {
     name = "vast";
-    nativeBuildInputs = [ pkgs.bazel pkgs.cmake pkgs.ninja pkgs.doxygen pkgs.graphviz-nox pkgs.ccache ];
+    nativeBuildInputs = [
+      pkgs.bazel
+      pkgs.cmake
+      pkgs.ninja
+      pkgs.doxygen
+      pkgs.graphviz-nox
+      pkgs.ccache
+      pkgs.include-what-you-use
+    ];
     buildInputs = [ pkgs.libpcap pkgs.curl.dev python ];
     hardeningDisable = [ "all" ];
     LANG = "en_US.UTF-8";
