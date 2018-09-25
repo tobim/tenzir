@@ -34,6 +34,7 @@ in with cppPkgs; {
     nativeBuildInputs = [
       pkgs.bazel
       pkgs.cmake
+      pkgs.jq
       pkgs.ninja
       pkgs.doxygen
       pkgs.graphviz-nox

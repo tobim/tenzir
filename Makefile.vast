@@ -44,6 +44,12 @@ CMAKEARGS += -DNO_AUTO_LIBCPP:BOOL=1
 CCACHE_CPP2 := true
 export CCACHE_CPP2
 
+$(buiddir):
+	mkdir -p $@
+
+.cache:
+	mkdir -p $@
+
 define BOZO
 
 CMAKEARGS-$(1)$(2) := $(CMAKEARGS)
@@ -86,8 +92,10 @@ INSTALLDIR-$(1)$(2) := $(installdir)/$$(SUBBUILD-$(1)$(2))
 
 CAF-$(1)$(2) := $(abspath $(caf_installdir)/$$(SUBBUILD-$(1)$(2)))
 
-$$(BUILD-$(1)$(2)):
+$$(BUILD-$(1)$(2)): | $$(buiddir) .cache
 	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' PATH=$$$${PATH}:/Users/tobim/.gem/ruby/2.4.0/bin cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DCAF_ROOT_DIR=$$(CAF-$(1)$(2)) -DCMAKE_INSTALL_PREFIX=$$(INSTALLDIR-$(1)$(2)) $$(CMAKEARGS-$(1)$(2))"
+	cp "$$(BUILDDIR-$(1)$(2))/compile_commands.json" .cache/compile_commands_vast.json
+	jq '.[]' .cache/compile_commands_*.json | jq -s '.' > compile_commands.json
 
 gen: $$(BUILD-$(1)$(2))
 
