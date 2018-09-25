@@ -40,6 +40,9 @@ in with cppPkgs; {
       pkgs.graphviz-nox
       pkgs.ccache
       pkgs.include-what-you-use
+      pkgs.opencl-headers
+      pkgs.openssl
+      pkgs.ocl-icd
     ];
     buildInputs = [ pkgs.libpcap pkgs.curl.dev python ];
     hardeningDisable = [ "all" ];
