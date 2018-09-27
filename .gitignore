@@ -1,3 +1,4 @@
 .DS_Store
+/.cache
 .mypy_cache
 /compile_commands.json
