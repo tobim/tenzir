@@ -36,8 +36,8 @@ let
   python = pkgs.python3.withPackages( ps: with ps; [ pyyaml schema ]);
 
 in with cppPkgs; {
-  vast = stdenv.mkDerivation {
-    name = "vast";
+  tenzir = stdenv.mkDerivation {
+    name = "tenzir-workspace";
     nativeBuildInputs = [
       pkgs.bazel
       pkgs.cmake
