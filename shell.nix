@@ -33,7 +33,17 @@ let
 
   cppPkgs = pkgs."${compiler}pkgs";
 
-  python = pkgs.python3.withPackages( ps: with ps; [ pyyaml schema ]);
+  python = pkgs.python3.withPackages( ps: with ps; [
+    pyyaml
+    schema
+  ]);
+
+  R = pkgs.rWrapper.override { packages = with pkgs.rPackages; [
+    dplyr
+    ggplot2
+    scales
+    tidyr
+  ]; };
 
 in with cppPkgs; {
   tenzir = stdenv.mkDerivation {
@@ -48,6 +58,7 @@ in with cppPkgs; {
       pkgs.ccache
       pkgs.include-what-you-use
       pkgs.openssl
+      R
     ] ++ lib.optional on_linux [
       pkgs.opencl-headers
       pkgs.ocl-icd
