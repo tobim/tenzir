@@ -40,7 +40,7 @@ in with cppPkgs; {
     name = "tenzir-workspace";
     nativeBuildInputs = [
       pkgs.bazel
-      pkgs.cmake
+      pkgs.cmake_3_0
       pkgs.jq
       pkgs.ninja
       pkgs.doxygen
