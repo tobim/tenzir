@@ -57,13 +57,17 @@ in with cppPkgs; {
       pkgs.graphviz-nox
       pkgs.ccache
       pkgs.include-what-you-use
+    ];
+    buildInputs = [
+      pkgs.curl.dev
+      pkgs.libpcap
       pkgs.openssl
+      python
       R
     ] ++ lib.optional on_linux [
       pkgs.opencl-headers
       pkgs.ocl-icd
     ];
-    buildInputs = [ pkgs.libpcap pkgs.curl.dev python ];
     hardeningDisable = [ "all" ];
     LANG = "en_US.UTF-8";
   };
