@@ -50,17 +50,21 @@ in with cppPkgs; {
     name = "tenzir-workspace";
     nativeBuildInputs = [
       pkgs.bazel
-      pkgs.cmake_3_0
+      pkgs.cmake
       pkgs.jq
       pkgs.ninja
       pkgs.doxygen
       pkgs.graphviz-nox
       pkgs.ccache
       pkgs.include-what-you-use
+    ] ++ lib.optional on_linux [
+      pkgs.killall
     ];
     buildInputs = [
+      pkgs.cairo
       pkgs.curl.dev
       pkgs.libpcap
+      pkgs.ncurses
       pkgs.openssl
       python
       R
