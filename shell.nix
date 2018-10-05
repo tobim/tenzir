@@ -8,20 +8,24 @@
 { compiler ? "clang6" }:
 
 let
-  nixpkgs = builtins.fetchGit {
-    url = https://github.com/NixOS/nixpkgs;
-    rev = "4477cf04b6779a537cdb5f0bd3dd30e75aeb4a3b";
-  };
+  #nixpkgs = builtins.fetchGit {
+  #  url = https://github.com/NixOS/nixpkgs;
+  #  rev = "4477cf04b6779a537cdb5f0bd3dd30e75aeb4a3b";
+  #};
 
-  #cpp_overlay = import (../../nixpkgs-cpp);
   cpp_overlay = import (builtins.fetchGit {
-    url = https://github.com/tobimpub/nixpkgs-cpp;
+    url = https://github.com/tobim/nixpkgs-cpp;
     rev = "ebfadee0e024e6bd43bb89b12535d5963324219b";
+  });
+
+  misc_overlay = import (builtins.fetchGit {
+    url = https://github.com/tobim/nix-misc;
+    rev = "e7a78ca1d371a7fe6cb1bcd160222012ae3a0cb4";
   });
 
   pkgs = import <nixpkgs> {
     config = {};
-    overlays = [ cpp_overlay ];
+    overlays = [ cpp_overlay misc_overlay ];
   };
 
   cppPkgs = pkgs."${compiler}pkgs";
