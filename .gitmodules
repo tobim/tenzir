@@ -14,3 +14,6 @@
 	path = core
 	url = git@github.com:tenzir/core.git
 	branch = master
+[submodule "events"]
+	path = events
+	url = git@github.com:tenzir/events.git
