@@ -8,6 +8,8 @@
 { compiler ? "clang6" }:
 
 let
+  on_darwin = builtins.currentSystem == "x86_64-darwin";
+  on_linux = builtins.currentSystem == "x86_64-linux";
   #nixpkgs = builtins.fetchGit {
   #  url = https://github.com/NixOS/nixpkgs;
   #  rev = "4477cf04b6779a537cdb5f0bd3dd30e75aeb4a3b";
@@ -27,6 +29,7 @@ let
     config = {};
     overlays = [ cpp_overlay misc_overlay ];
   };
+  lib = pkgs.lib;
 
   cppPkgs = pkgs."${compiler}pkgs";
 
@@ -44,8 +47,9 @@ in with cppPkgs; {
       pkgs.graphviz-nox
       pkgs.ccache
       pkgs.include-what-you-use
-      pkgs.opencl-headers
       pkgs.openssl
+    ] ++ lib.optional on_linux [
+      pkgs.opencl-headers
       pkgs.ocl-icd
     ];
     buildInputs = [ pkgs.libpcap pkgs.curl.dev python ];
