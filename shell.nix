@@ -8,8 +8,6 @@
 { compiler ? "clang6" }:
 
 let
-  on_darwin = builtins.currentSystem == "x86_64-darwin";
-  on_linux = builtins.currentSystem == "x86_64-linux";
   #nixpkgs = builtins.fetchGit {
   #  url = https://github.com/NixOS/nixpkgs;
   #  rev = "4477cf04b6779a537cdb5f0bd3dd30e75aeb4a3b";
@@ -22,7 +20,7 @@ let
 
   misc_overlay = import (builtins.fetchGit {
     url = https://github.com/tobim/nix-misc;
-    rev = "e7a78ca1d371a7fe6cb1bcd160222012ae3a0cb4";
+    rev = "8a3354eb5378282e15ea5f37f129686390008afd";
   });
 
   pkgs = import <nixpkgs> {
@@ -50,6 +48,7 @@ in with cppPkgs; {
     name = "tenzir-workspace";
     nativeBuildInputs = [
       pkgs.bazel
+      #pkgs.cmake_3_0
       pkgs.cmake
       pkgs.jq
       pkgs.ninja
@@ -57,7 +56,7 @@ in with cppPkgs; {
       pkgs.graphviz-nox
       pkgs.ccache
       pkgs.include-what-you-use
-    ] ++ lib.optional on_linux [
+    ] ++ lib.optional stdenv.isLinux [
       pkgs.killall
     ];
     buildInputs = [
@@ -68,7 +67,7 @@ in with cppPkgs; {
       pkgs.openssl
       python
       R
-    ] ++ lib.optional on_linux [
+    ] ++ lib.optional stdenv.isLinux [
       pkgs.opencl-headers
       pkgs.ocl-icd
     ];
