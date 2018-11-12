@@ -15,7 +15,7 @@ let
 
   cpp_overlay = import (builtins.fetchGit {
     url = https://github.com/tobim/nixpkgs-cpp;
-    rev = "ebfadee0e024e6bd43bb89b12535d5963324219b";
+    rev = "938d1af26ee503f3d909c2ac2ec28a96649db8d4";
   });
 
   misc_overlay = import (builtins.fetchGit {
@@ -63,6 +63,7 @@ in with cppPkgs; {
     buildInputs = [
       pkgs.cairo
       pkgs.curl.dev
+      cppPkgs.gbenchmark
       pkgs.libpcap
       pkgs.ncurses
       pkgs.openssl
