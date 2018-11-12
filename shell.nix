@@ -20,7 +20,7 @@ let
 
   misc_overlay = import (builtins.fetchGit {
     url = https://github.com/tobim/nix-misc;
-    rev = "8a3354eb5378282e15ea5f37f129686390008afd";
+    rev = "bb313cb900bc7b5f0620536d7e8685410d9bd658";
   });
 
   pkgs = import <nixpkgs> {
@@ -48,7 +48,7 @@ in with cppPkgs; {
     name = "tenzir-workspace";
     nativeBuildInputs = [
       pkgs.bazel
-      #pkgs.cmake_3_0
+      #pkgs.cmake_3_1
       pkgs.cmake
       pkgs.jq
       pkgs.ninja
@@ -58,6 +58,7 @@ in with cppPkgs; {
       pkgs.include-what-you-use
     ] ++ lib.optional stdenv.isLinux [
       pkgs.killall
+      pkgs.linuxPackages.perf
     ];
     buildInputs = [
       pkgs.cairo

@@ -6,10 +6,11 @@ EXTERNAL := $(filter-out $(phony), $(MAKECMDGOALS))
 
 ns := nix-shell --pure
 
-source := vast
-builddir := $(HOME)/build/vast
-installdir := $(HOME)/install/vast
+source := core
+builddir := $(HOME)/build/core
+installdir := $(HOME)/install/core
 caf_installdir := $(HOME)/install/caf
+vast_installdir := $(HOME)/install/vast
 
 ifeq (${attr},)
 	attr := clang6
@@ -69,7 +70,7 @@ else ifeq ($(2),redeb)
 	CMAKEARGS-$(1)$(2) += -DVAST_LOG_LEVEL:STRING=2
 else
 	CMAKEARGS-$(1)$(2) += -DVAST_LOG_LEVEL:STRING=4
-	CMAKEARGS-$(1)$(2) += -DVAST_ENABLE_ASSERTIONS:BOOL=1
+	CMAKEARGS-$(1)$(2) += -DTENZIR_ENABLE_ASSERTIONS:BOOL=1
 	$(if $(filter "$(origin san)","undefined"),SAN-$(1)$(2) := asan)
 endif
 
@@ -95,10 +96,11 @@ BUILD-$(1)$(2) := $$(BUILDDIR-$(1)$(2))/Makefile
 INSTALLDIR-$(1)$(2) := $(installdir)/$$(SUBBUILD-$(1)$(2))
 
 CAF-$(1)$(2) := $(abspath $(caf_installdir)/$$(SUBBUILD-$(1)$(2)))
+VAST-$(1)$(2) := $(abspath $(vast_installdir)/$$(SUBBUILD-$(1)$(2)))
 
 $$(BUILD-$(1)$(2)): | $$(buiddir) .cache
-	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' PATH=$$$${PATH}:/Users/tobim/.gem/ruby/2.4.0/bin cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DCAF_ROOT_DIR=$$(CAF-$(1)$(2)) -DCMAKE_INSTALL_PREFIX=$$(INSTALLDIR-$(1)$(2)) $$(CMAKEARGS-$(1)$(2))"
-	cp "$$(BUILDDIR-$(1)$(2))/compile_commands.json" .cache/compile_commands_vast.json
+	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' PATH=$$$${PATH}:/Users/tobim/.gem/ruby/2.4.0/bin cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DCAF_ROOT_DIR=$$(CAF-$(1)$(2)) -DVAST_ROOT_DIR=$$(VAST-$(1)$(2)) -DCMAKE_INSTALL_PREFIX=$$(INSTALLDIR-$(1)$(2)) $$(CMAKEARGS-$(1)$(2))"
+	cp "$$(BUILDDIR-$(1)$(2))/compile_commands.json" .cache/compile_commands_core.json
 	jq '.[]' .cache/compile_commands_*.json | jq -s '.' > compile_commands.json
 
 gen: $$(BUILD-$(1)$(2))

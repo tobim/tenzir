@@ -70,6 +70,9 @@ endif
 ifeq ($(2),rere)
 	VC-$(1)$(2) := Release
 	CMAKEARGS-$(1)$(2) += -DCAF_LOG_LEVEL:STRING=2
+else ifeq ($(2),redeb)
+	VC-$(1)$(2) := RelWithDebInfo
+	CMAKEARGS-$(1)$(2) += -DCAF_LOG_LEVEL:STRING=2
 else
 	CMAKEARGS-$(1)$(2) += -DCAF_LOG_LEVEL:STRING=4
 	$(if $(filter "$(origin san)","undefined"),SAN-$(1)$(2) := asan)
