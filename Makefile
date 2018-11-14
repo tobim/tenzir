@@ -1,6 +1,9 @@
 
-INTERNAL := caf vast core
+INTERNAL := broker caf vast core
 EXTERNAL := $(filter-out $(INTERNAL), $(MAKECMDGOALS))
+
+broker:
+	$(MAKE) -f Makefile.broker $(EXTERNAL)
 
 caf:
 	$(MAKE) -f Makefile.caf $(EXTERNAL)
