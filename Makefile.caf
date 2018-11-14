@@ -42,7 +42,7 @@ CMAKEARGS := -DCAF_USE_CCACHE:BOOL=1
 CMAKEARGS += -DCAF_NO_BENCHMARKS:BOOL=1
 CMAKEARGS += -DCAF_NO_EXAMPLES:BOOL=1
 CMAKEARGS += -DCAF_NO_OPENCL:BOOL=1
-CMAKEARGS += -DCAF_NO_OPENSSL:BOOL=1
+CMAKEARGS += -DCAF_NO_OPENSSL:BOOL=0
 CMAKEARGS += -DCAF_NO_PYTHON:BOOL=1
 CMAKEARGS += -DCAF_NO_AUTO_LIBCPP:BOOL=1
 CMAKEARGS += -DCAF_NO_COMPILER_CHECK:BOOL=1
@@ -100,8 +100,7 @@ BUILD-$(1)$(2) := $$(BUILDDIR-$(1)$(2))/Makefile
 INSTALLDIR-$(1)$(2) := $(installdir)/$$(SUBBUILD-$(1)$(2))
 
 $$(BUILD-$(1)$(2)): | $$(buiddir) .cache
-	#$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DLIBRARY_OUTPUT_PATH=$$(BUILDDIR-$(1)$(2))/lib -DEXECUTABLE_OUTPUT_PATH=$$(BUILDDIR-$(1)$(2))/bin $$(CMAKEARGS-$(1)$(2))"
-	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DCMAKE_INSTALL_PREFIX=$$(INSTALLDIR-$(1)$(2)) $$(CMAKEARGS-$(1)$(2))"
+	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DCMAKE_INSTALL_PREFIX=$$(INSTALLDIR-$(1)$(2)) -DLIBRARY_OUTPUT_PATH=$$(BUILDDIR-$(1)$(2))/lib -DEXECUTABLE_OUTPUT_PATH=$$(BUILDDIR-$(1)$(2))/bin $$(CMAKEARGS-$(1)$(2))"
 	cp "$$(BUILDDIR-$(1)$(2))/compile_commands.json" .cache/compile_commands_caf.json
 	jq '.[]' .cache/compile_commands_*.json | jq -s '.' > compile_commands.json
 

@@ -9,7 +9,8 @@ ns := nix-shell --pure
 source := vast
 builddir := $(HOME)/build/vast
 installdir := $(HOME)/install/vast
-caf_installdir := $(HOME)/install/caf
+broker_dir := $(HOME)/build/broker
+caf_dir := $(HOME)/build/caf
 
 ifeq (${attr},)
 	attr := clang6
@@ -63,7 +64,7 @@ endif
 ifeq ($(2),rere)
 	VC-$(1)$(2) := Release
 	CMAKEARGS-$(1)$(2) += -DVAST_LOG_LEVEL:STRING=2
-	CMAKEARGS-$(1)$(2) += -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=:BOOL=1
+	CMAKEARGS-$(1)$(2) += -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=1
 else ifeq ($(2),redeb)
 	VC-$(1)$(2) := RelWithDebInfo
 	CMAKEARGS-$(1)$(2) += -DVAST_LOG_LEVEL:STRING=2
@@ -94,10 +95,11 @@ BUILDDIR-$(1)$(2) := $(builddir)/$$(SUBBUILD-$(1)$(2))
 BUILD-$(1)$(2) := $$(BUILDDIR-$(1)$(2))/Makefile
 INSTALLDIR-$(1)$(2) := $(installdir)/$$(SUBBUILD-$(1)$(2))
 
-CAF-$(1)$(2) := $(abspath $(caf_installdir)/$$(SUBBUILD-$(1)$(2)))
+BROKER-$(1)$(2) := $(abspath $(broker_dir)/$$(SUBBUILD-$(1)$(2)))
+CAF-$(1)$(2) := $(abspath $(caf_dir)/$$(SUBBUILD-$(1)$(2)))
 
 $$(BUILD-$(1)$(2)): | $$(buiddir) .cache
-	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' PATH=$$$${PATH}:/Users/tobim/.gem/ruby/2.4.0/bin cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DCAF_ROOT_DIR=$$(CAF-$(1)$(2)) -DCMAKE_INSTALL_PREFIX=$$(INSTALLDIR-$(1)$(2)) $$(CMAKEARGS-$(1)$(2))"
+	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' PATH=$$$${PATH}:/Users/tobim/.gem/ruby/2.4.0/bin cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DBROKER_ROOT_DIR=$$(BROKER-$(1)$(2)) -DCAF_ROOT_DIR=$$(CAF-$(1)$(2)) -DCMAKE_INSTALL_PREFIX=$$(INSTALLDIR-$(1)$(2)) $$(CMAKEARGS-$(1)$(2))"
 	cp "$$(BUILDDIR-$(1)$(2))/compile_commands.json" .cache/compile_commands_vast.json
 	jq '.[]' .cache/compile_commands_*.json | jq -s '.' > compile_commands.json
 
