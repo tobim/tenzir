@@ -7,6 +7,7 @@ EXTERNAL := $(filter-out $(phony), $(MAKECMDGOALS))
 ns := nix-shell --pure
 
 source := broker
+abssource := $(abspath $(source))
 builddir := $(HOME)/build/broker
 installdir := $(HOME)/install/broker
 caf_dir := $(HOME)/build/caf
@@ -44,8 +45,13 @@ CMAKEARGS += -DDISABLE_PYTHON_BINDINGS:BOOL=1
 CCACHE_CPP2 := true
 export CCACHE_CPP2
 
-$(buiddir):
+$(builddir):
 	mkdir -p $@
+
+$(builddir)/broker: | $(builddir)
+	ln -s $(abssource)/broker $@
+
+source_links: $(builddir)/broker
 
 .cache:
 	mkdir -p $@
@@ -66,7 +72,6 @@ ifeq ($(2),rere)
 else ifeq ($(2),redeb)
 	VC-$(1)$(2) := RelWithDebInfo
 else
-	CMAKEARGS-$(1)$(2) += -DVAST_ENABLE_ASSERTIONS:BOOL=1
 	$(if $(filter "$(origin san)","undefined"),SAN-$(1)$(2) := asan)
 endif
 
@@ -93,8 +98,8 @@ INSTALLDIR-$(1)$(2) := $(installdir)/$$(SUBBUILD-$(1)$(2))
 
 CAF-$(1)$(2) := $(abspath $(caf_dir)/$$(SUBBUILD-$(1)$(2)))
 
-$$(BUILD-$(1)$(2)): | $$(buiddir) .cache
-	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' PATH=$$$${PATH}:/Users/tobim/.gem/ruby/2.4.0/bin cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DCAF_ROOT_DIR=$$(CAF-$(1)$(2)) -DCMAKE_INSTALL_PREFIX=$$(INSTALLDIR-$(1)$(2)) -DLIBRARY_OUTPUT_PATH=$$(BUILDDIR-$(1)$(2))/lib -DEXECUTABLE_OUTPUT_PATH=$$(BUILDDIR-$(1)$(2))/bin $$(CMAKEARGS-$(1)$(2))"
+$$(BUILD-$(1)$(2)): | $$(builddir) .cache source_links
+	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' PATH=$$$${PATH}:/Users/tobim/.gem/ruby/2.4.0/bin cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DCAF_ROOT_DIR=$$(CAF-$(1)$(2)) -DCMAKE_INSTALL_PREFIX=$$(INSTALLDIR-$(1)$(2)) $$(CMAKEARGS-$(1)$(2))"
 	cp "$$(BUILDDIR-$(1)$(2))/compile_commands.json" .cache/compile_commands_vast.json
 	jq '.[]' .cache/compile_commands_*.json | jq -s '.' > compile_commands.json
 

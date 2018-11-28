@@ -7,6 +7,7 @@ EXTERNAL := $(filter-out $(phony), $(MAKECMDGOALS))
 ns := nix-shell --pure
 
 source := vast
+abssource := $(abspath $(source))
 builddir := $(HOME)/build/vast
 installdir := $(HOME)/install/vast
 broker_dir := $(HOME)/build/broker
@@ -45,8 +46,17 @@ CMAKEARGS += -DNO_AUTO_LIBCPP:BOOL=1
 CCACHE_CPP2 := true
 export CCACHE_CPP2
 
-$(buiddir):
+$(builddir):
 	mkdir -p $@
+
+$(builddir)/libvast: | $(builddir)
+	ln -s $(abssource)/libvast $@
+
+$(builddir)/libvast_test: | $(builddir)
+	ln -s $(abssource)/libvast_test $@
+
+source_links: $(builddir)/libvast \
+			  $(builddir)/libvast_test
 
 .cache:
 	mkdir -p $@
@@ -98,7 +108,7 @@ INSTALLDIR-$(1)$(2) := $(installdir)/$$(SUBBUILD-$(1)$(2))
 BROKER-$(1)$(2) := $(abspath $(broker_dir)/$$(SUBBUILD-$(1)$(2)))
 CAF-$(1)$(2) := $(abspath $(caf_dir)/$$(SUBBUILD-$(1)$(2)))
 
-$$(BUILD-$(1)$(2)): | $$(buiddir) .cache
+$$(BUILD-$(1)$(2)): | $$(builddir) .cache source_links
 	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' PATH=$$$${PATH}:/Users/tobim/.gem/ruby/2.4.0/bin cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DBROKER_ROOT_DIR=$$(BROKER-$(1)$(2)) -DCAF_ROOT_DIR=$$(CAF-$(1)$(2)) -DCMAKE_INSTALL_PREFIX=$$(INSTALLDIR-$(1)$(2)) $$(CMAKEARGS-$(1)$(2))"
 	cp "$$(BUILDDIR-$(1)$(2))/compile_commands.json" .cache/compile_commands_vast.json
 	jq '.[]' .cache/compile_commands_*.json | jq -s '.' > compile_commands.json
