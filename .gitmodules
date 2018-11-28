@@ -17,3 +17,6 @@
 [submodule "events"]
 	path = events
 	url = git@github.com:tenzir/events.git
+[submodule "broker"]
+	path = broker
+	url = https://github.com/bro/broker.git
