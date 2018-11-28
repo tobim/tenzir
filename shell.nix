@@ -43,37 +43,37 @@ let
     tidyr
   ]; };
 
-in with cppPkgs; {
-  tenzir = stdenv.mkDerivation {
-    name = "tenzir-workspace";
-    nativeBuildInputs = [
-      pkgs.bazel
-      #pkgs.cmake_3_1
-      pkgs.cmake
-      pkgs.jq
-      pkgs.ninja
-      pkgs.doxygen
-      pkgs.graphviz-nox
-      pkgs.ccache
-      pkgs.include-what-you-use
-    ] ++ lib.optional stdenv.isLinux [
-      pkgs.killall
-      pkgs.linuxPackages.perf
-    ];
-    buildInputs = [
-      pkgs.cairo
-      pkgs.curl.dev
-      cppPkgs.gbenchmark
-      pkgs.libpcap
-      pkgs.ncurses
-      pkgs.openssl
-      python
-      R
-    ] ++ lib.optional stdenv.isLinux [
-      pkgs.opencl-headers
-      pkgs.ocl-icd
-    ];
-    hardeningDisable = [ "all" ];
-    LANG = "en_US.UTF-8";
-  };
+in with cppPkgs;
+
+stdenv.mkDerivation {
+  name = "tenzir";
+  nativeBuildInputs = [
+    pkgs.bazel
+    #pkgs.cmake_3_1
+    pkgs.cmake
+    pkgs.jq
+    pkgs.ninja
+    pkgs.doxygen
+    pkgs.graphviz-nox
+    pkgs.ccache
+    pkgs.include-what-you-use
+  ] ++ lib.optional stdenv.isLinux [
+    pkgs.killall
+    pkgs.linuxPackages.perf
+  ];
+  buildInputs = [
+    pkgs.cairo
+    pkgs.curl.dev
+    cppPkgs.gbenchmark
+    pkgs.libpcap
+    pkgs.ncurses
+    pkgs.openssl
+    python
+    R
+  ] ++ lib.optional stdenv.isLinux [
+    pkgs.opencl-headers
+    pkgs.ocl-icd
+  ];
+  hardeningDisable = [ "all" ];
+  LANG = "en_US.UTF-8";
 }
