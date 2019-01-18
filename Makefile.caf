@@ -39,7 +39,7 @@ variant_:= $(subst $(comma),$(space),$(variant))
 
 CMAKEARGS := -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=1
 
-CMAKEARGS := -DCAF_USE_CCACHE:BOOL=1
+CMAKEARGS := -DCAF_USE_CCACHE:BOOL=0
 CMAKEARGS += -DCAF_NO_EXAMPLES:BOOL=1
 CMAKEARGS += -DCAF_NO_OPENCL:BOOL=1
 CMAKEARGS += -DCAF_NO_OPENSSL:BOOL=0
@@ -83,7 +83,7 @@ ifeq ($(2),release)
 endif
 ifeq ($(2),rere)
 	VC-$(1)$(2) := Release
-	CMAKEARGS-$(1)$(2) += -DCAF_LOG_LEVEL:STRING=INFO
+	CMAKEARGS-$(1)$(2) += -DCAF_LOG_LEVEL:STRING=QUIET
 else ifeq ($(2),redeb)
 	VC-$(1)$(2) := RelWithDebInfo
 	CMAKEARGS-$(1)$(2) += -DCAF_LOG_LEVEL:STRING=INFO

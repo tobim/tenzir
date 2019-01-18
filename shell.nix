@@ -40,6 +40,7 @@ let
     dplyr
     ggplot2
     scales
+    stringr
     tidyr
   ]; };
 

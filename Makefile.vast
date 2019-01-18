@@ -41,6 +41,7 @@ variant_:= $(subst $(comma),$(space),$(variant))
 
 CMAKEARGS := -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=1
 CMAKEARGS += -DNO_AUTO_LIBCPP:BOOL=1
+CMAKEARGS += -DVAST_RELOCATEABLE_INSTALL:BOOL=1
 #CMAKEARGS += -DMORE_WARNINGS=1
 
 CCACHE_CPP2 := true
@@ -50,10 +51,10 @@ $(builddir):
 	mkdir -p $@
 
 $(builddir)/libvast: | $(builddir)
-	ln -s $(abssource)/libvast $@
+	ln -f -s $(abssource)/libvast $@
 
 $(builddir)/libvast_test: | $(builddir)
-	ln -s $(abssource)/libvast_test $@
+	ln -f -s $(abssource)/libvast_test $@
 
 source_links: $(builddir)/libvast \
 			  $(builddir)/libvast_test
@@ -77,7 +78,7 @@ ifeq ($(2),rere)
 	CMAKEARGS-$(1)$(2) += -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=1
 else ifeq ($(2),redeb)
 	VC-$(1)$(2) := RelWithDebInfo
-	CMAKEARGS-$(1)$(2) += -DVAST_LOG_LEVEL:STRING=INFO
+	CMAKEARGS-$(1)$(2) += -DVAST_LOG_LEVEL:STRING=DEBUG
 else
 	CMAKEARGS-$(1)$(2) += -DVAST_LOG_LEVEL:STRING=TRACE
 	CMAKEARGS-$(1)$(2) += -DVAST_ENABLE_ASSERTIONS:BOOL=1
@@ -100,13 +101,14 @@ ifneq ($$(SAN-$(1)$(2)),)
 	SAN_-$(1)$(2) = -$$(subst $$(comma),+,$$(SAN-$(1)$(2)))
 endif
 
-SUBBUILD-$(1)$(2) := $(1)-$(2)$$(SAN_-$(1)$(2))$(dtag_)
+BASEBUILD-$(1)$(2) := $(1)-$(2)$$(SAN_-$(1)$(2))
+SUBBUILD-$(1)$(2) := $$(BASEBUILD-$(1)$(2))$(dtag_)
 BUILDDIR-$(1)$(2) := $(builddir)/$$(SUBBUILD-$(1)$(2))
 BUILD-$(1)$(2) := $$(BUILDDIR-$(1)$(2))/Makefile
 INSTALLDIR-$(1)$(2) := $(installdir)/$$(SUBBUILD-$(1)$(2))
 
-BROKER-$(1)$(2) := $(abspath $(broker_dir)/$$(SUBBUILD-$(1)$(2)))
-CAF-$(1)$(2) := $(abspath $(caf_dir)/$$(SUBBUILD-$(1)$(2)))
+BROKER-$(1)$(2) := $(abspath $(broker_dir)/$$(BASEBUILD-$(1)$(2)))
+CAF-$(1)$(2) := $(abspath $(caf_dir)/$$(BASEBUILD-$(1)$(2)))
 
 $$(BUILD-$(1)$(2)): | $$(builddir) .cache source_links
 	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' PATH=$$$${PATH}:/Users/tobim/.gem/ruby/2.4.0/bin cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DBROKER_ROOT_DIR=$$(BROKER-$(1)$(2)) -DCAF_ROOT_DIR=$$(CAF-$(1)$(2)) -DCMAKE_INSTALL_PREFIX=$$(INSTALLDIR-$(1)$(2)) $$(CMAKEARGS-$(1)$(2))"
