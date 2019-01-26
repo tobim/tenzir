@@ -1,14 +1,19 @@
-{ stdenv, cmake, caf, libpcap, curl }:
-
-stdenv.mkDerivation rec {
+{ stdenv, cmake, caf, libpcap, curl, broker }:
+let
   name = "vast-${version}";
   version = "0.1";
+in
+
+stdenv.mkDerivation {
+  inherit name;
+  inherit version;
 
   src = ../../vast;
 
   nativeBuildInputs = [ cmake ];
 
   buildInputs = [
+    broker
     caf
     curl.dev
     libpcap
@@ -19,6 +24,6 @@ stdenv.mkDerivation rec {
     homepage = http://vast.io/;
     license = licenses.bsd3;
     platforms = platforms.unix;
-    maintainers = with maintainers; [ bobakker ];
+    maintainers = with maintainers; [ tobim ];
   };
 }
