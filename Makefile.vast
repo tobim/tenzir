@@ -81,7 +81,6 @@ endif
 ifeq ($(2),rere)
 	VC-$(1)$(2) := Release
 	CMAKEARGS-$(1)$(2) += -DVAST_LOG_LEVEL:STRING=INFO
-	CMAKEARGS-$(1)$(2) += -DCMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=1
 else ifeq ($(2),redeb)
 	VC-$(1)$(2) := RelWithDebInfo
 	CMAKEARGS-$(1)$(2) += -DVAST_LOG_LEVEL:STRING=DEBUG

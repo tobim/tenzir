@@ -73,6 +73,6 @@ stdenv.mkDerivation {
     pkgs.opencl-headers
     pkgs.ocl-icd
   ];
-  #hardeningDisable = [ "all" ];
+  hardeningDisable = [ "fortify" ];
   LANG = "en_US.UTF-8";
 }
