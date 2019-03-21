@@ -12,7 +12,12 @@ builddir := $(HOME)/build/caf
 installdir := $(HOME)/install/caf
 
 ifeq (${attr},)
-	attr := clang6
+	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S),Darwin)
+		attr := clang7
+	else
+		attr := gcc8
+	endif
 endif
 
 ifeq (${variant},)
