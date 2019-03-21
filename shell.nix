@@ -1,17 +1,8 @@
-# Nix skeleton for compiler, cmake, boost.
-# Dependencies (boost and others you specify) are getting built with selectec compiler (for ABI compatibility).
-# Examples:
-#   nix-shell --argstr compiler gcc5 --run 'mkdir build && cd build && cmake .. && cmake --build .'
-#   nix-shell --argstr compiler gcc6 --run 'mkdir build && cd build && cmake .. && cmake --build .'
-#   nix-shell --argstr compiler clang_5 --run 'mkdir build && cd build && cmake .. && cmake --build .'
-
-{ compiler ? "clang6" }:
+{ compiler ? null }:
 
 let
-  #nixpkgs = builtins.fetchGit {
-  #  url = https://github.com/NixOS/nixpkgs;
-  #  rev = "4477cf04b6779a537cdb5f0bd3dd30e75aeb4a3b";
-  #};
+  nixpkgs = ~/projects/nixpkgs;
+  #nixpkgs = import tenzir/nix/pinned.nix;
 
   cpp_overlay = import (builtins.fetchGit {
     url = https://github.com/tobim/nixpkgs-cpp;
@@ -23,13 +14,19 @@ let
     rev = "bb313cb900bc7b5f0620536d7e8685410d9bd658";
   });
 
-  pkgs = import <nixpkgs> {
+  pkgs = import nixpkgs {
     config = {};
     overlays = [ cpp_overlay misc_overlay ];
   };
   lib = pkgs.lib;
 
-  cppPkgs = pkgs."${compiler}pkgs";
+  cmp = if (compiler != null) then
+        compiler
+    else if pkgs.stdenv.isDarwin then
+        "clang7"
+    else
+        "gcc8";
+  cppPkgs = pkgs."${cmp}pkgs";
 
   python = pkgs.python3.withPackages( ps: with ps; [
     pyyaml
@@ -47,6 +44,7 @@ let
 in with cppPkgs;
 
 stdenv.mkDerivation {
+  src = ./.;
   name = "tenzir";
   nativeBuildInputs = [
     pkgs.bazel
@@ -75,6 +73,6 @@ stdenv.mkDerivation {
     pkgs.opencl-headers
     pkgs.ocl-icd
   ];
-  hardeningDisable = [ "all" ];
+  #hardeningDisable = [ "all" ];
   LANG = "en_US.UTF-8";
 }
