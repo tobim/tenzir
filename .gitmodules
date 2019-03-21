@@ -6,17 +6,10 @@
 	path = vast
 	url = git@github.com:vast-io/vast.git
 	branch = master
-[submodule "integration"]
-	path = integration
-	url = git@github.com:tenzir/integration.git
-	branch = master
 [submodule "core"]
 	path = tenzir
 	url = git@github.com:tenzir/core.git
 	branch = master
-[submodule "events"]
-	path = events
-	url = git@github.com:tenzir/events.git
 [submodule "broker"]
 	path = broker
 	url = https://github.com/bro/broker.git
