@@ -112,7 +112,7 @@ BROKER-$(1)$(2) := $(abspath $(broker_dir)/$$(BASEBUILD-$(1)$(2)))
 CAF-$(1)$(2) := $(abspath $(caf_dir)/$$(BASEBUILD-$(1)$(2)))
 
 $$(BUILD-$(1)$(2)): | $$(builddir) .cache source_links
-	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' PATH=$$$${PATH}:/Users/tobim/.gem/ruby/2.4.0/bin cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DBROKER_ROOT_DIR=$$(BROKER-$(1)$(2)) -DCAF_ROOT_DIR=$$(CAF-$(1)$(2)) -DCMAKE_INSTALL_PREFIX=$$(INSTALLDIR-$(1)$(2)) $$(CMAKEARGS-$(1)$(2))"
+	$(ns) --argstr compiler $(1) --run "NIX_CXXSTDLIB_LINK='' PATH=$$$${PATH}:/Users/tobim/.gem/ruby/2.4.0/bin cmake -B$$(BUILDDIR-$(1)$(2)) -H$(source) -DCMAKE_BUILD_TYPE=$$(VC-$(1)$(2)) -DCAF_ROOT_DIR=$$(CAF-$(1)$(2)) -DCMAKE_INSTALL_PREFIX=$$(INSTALLDIR-$(1)$(2)) $$(CMAKEARGS-$(1)$(2))"
 	cp "$$(BUILDDIR-$(1)$(2))/compile_commands.json" .cache/compile_commands_vast.json
 	jq '.[]' .cache/compile_commands_*.json | jq -s '.' > compile_commands.json
 
