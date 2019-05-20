@@ -8,9 +8,9 @@ call altr#define('%/vast/%/vast/%.hpp',
 \                '%/vast/%/src/%.cpp',
 \                '%/vast/%/test/%.cpp')
 
-call altr#define('%/core/%/core/%.hpp',
-\                '%/core/%/src/%.cpp',
-\                '%/core/%/test/%.cpp')
+call altr#define('%/tenzir/%/tenzir/%.hpp',
+\                '%/tenzir/%/src/%.cpp',
+\                '%/tenzir/%/test/%.cpp')
 
-call altr#define('%/test/fixtures/%.hpp',
-\                '%/test/fixtures/%.cpp')
+call altr#define('%/vast/libvast_test/vast/test/fixtures/%.hpp',
+\                '%/vast/libvast_test/src/%.cpp')

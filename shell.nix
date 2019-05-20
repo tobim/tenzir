@@ -20,6 +20,8 @@ let
   };
   lib = pkgs.lib;
 
+  inherit (import (builtins.fetchTarball "https://github.com/hercules-ci/gitignore/archive/master.tar.gz") { }) gitignoreSource;
+
   cmp = if (compiler != null) then
         compiler
     else if pkgs.stdenv.isDarwin then
@@ -28,7 +30,21 @@ let
         "gcc8";
   cppPkgs = pkgs."${cmp}pkgs";
 
-  python = pkgs.python3.withPackages( ps: with ps; [
+  pythonPackages = pkgs.python3Packages;
+
+  coloredlogs = pythonPackages.buildPythonPackage rec {
+    pname = "coloredlogs";
+    version = "10.0";
+    src = pythonPackages.fetchPypi {
+      inherit pname version;
+      sha256 = "0dkw6xp0r1dwgz4s2f58npx5nxfq51wf4l6qkm5ib27slgfs4sdq";
+    };
+    propagatedBuildInputs = [ pythonPackages.humanfriendly ];
+    doCheck = false;
+  };
+
+  python = pythonPackages.python.withPackages( ps: with ps; [
+    coloredlogs
     pyyaml
     schema
   ]);
@@ -44,7 +60,7 @@ let
 in with cppPkgs;
 
 stdenv.mkDerivation {
-  src = ./.;
+  #src = gitignoreSource ./.;
   name = "tenzir";
   nativeBuildInputs = [
     pkgs.bazel
@@ -73,6 +89,6 @@ stdenv.mkDerivation {
     pkgs.opencl-headers
     pkgs.ocl-icd
   ];
-  hardeningDisable = [ "fortify" ];
+  hardeningDisable = [ "all" ];
   LANG = "en_US.UTF-8";
 }
