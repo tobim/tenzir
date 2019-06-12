@@ -15,7 +15,7 @@ caf_dir := $(HOME)/build/caf
 ifeq (${attr},)
 	UNAME_S := $(shell uname -s)
 	ifeq ($(UNAME_S),Darwin)
-		attr := clang7
+		attr := clang8
 	else
 		attr := gcc8
 	endif

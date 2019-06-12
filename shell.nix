@@ -6,7 +6,7 @@ let
 
   cpp_overlay = import (builtins.fetchGit {
     url = https://github.com/tobim/nixpkgs-cpp;
-    rev = "938d1af26ee503f3d909c2ac2ec28a96649db8d4";
+    rev = "9c33885eeefbcdfd840204a54ad6e0e0fcac0bd1";
   });
 
   misc_overlay = import (builtins.fetchGit {
@@ -25,7 +25,7 @@ let
   cmp = if (compiler != null) then
         compiler
     else if pkgs.stdenv.isDarwin then
-        "clang7"
+        "clang8"
     else
         "gcc8";
   cppPkgs = pkgs."${cmp}pkgs";
@@ -45,6 +45,7 @@ let
 
   python = pythonPackages.python.withPackages( ps: with ps; [
     coloredlogs
+    flask
     pyyaml
     schema
   ]);
